@@ -19,6 +19,7 @@ pymongo = "*"
 redis = "*"
 finta = "*"
 plotly = "*"
+termcolor = "*"
 
 [requires]
 python_version = "3.7"

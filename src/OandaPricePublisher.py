@@ -15,10 +15,10 @@ oanda_stream = OandaStream()
 
 
 def mongodb_loop():
-    records = get_data_from_oanda_stream(10)
+    records = get_data_from_oanda_stream(2000)
     # publish to queue
     for i, record in enumerate(records):
-        time.sleep(1)
+        # time.sleep(1)
         publish_price(record)
 
 
@@ -30,6 +30,8 @@ def publish_price(price_dict):
 
 
 def main(run_mode):
+    # redis_helper.set_run_mode_live()
+    rabbit_helper.configure_oanda_publish_channel()
     if run_mode == cons.RUN_MODE_LIVE:
         print('oanda_stream')
         oanda_stream.stream(publish_price)
@@ -39,7 +41,7 @@ def main(run_mode):
 
 
 if __name__ == "__main__":
-    redis_helper.set_run_mode_live()
+    redis_helper.set_run_mode_testing()
     run_mode = redis_helper.get_run_mode()
     print(f"======={run_mode}=======")
     main(run_mode)

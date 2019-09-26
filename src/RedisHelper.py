@@ -16,6 +16,18 @@ class redis_helper():
         return red.get(key)
 
     @staticmethod
+    def set_bool(key, value: bool):
+        if value:
+            red.set(key, 1)
+        else:
+            red.set(key, 0)
+
+    @staticmethod
+    def get_bool(key):
+        value = int(red.get(key))
+        return bool(value)
+
+    @staticmethod
     def get_run_mode():
         run_mode = redis_helper.get(cons.RUN_MODE)
         if run_mode is None:

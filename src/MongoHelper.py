@@ -11,12 +11,12 @@ def get_data_from_oanda_stream(record_limit):
     result = client.matrix_data.oanda_stream.find(
         {
             'time': {
-                '$gt': "2019-09-17T00:00:00Z",
-                '$lt': "2019-09-17T09:00:00Z"
+                '$gt': "2019-09-17T04:00:00Z",
+                '$lt': "2019-09-17T17:00:00Z"
             },
             'instrument': 'EUR_USD'
         },
-        limit=10)
+        limit=record_limit)
     return result
 
 

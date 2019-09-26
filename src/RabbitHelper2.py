@@ -6,8 +6,7 @@ from Constants import cons
 class RabbitHelper:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.connection = self.get_connection()
-        self.oanda_publish_channel = self.get_oanda_publish_channel()
+        self.oanda_publish_channel = None
 
     def get_connection(self):
         username = env.get(cons.RABBIT_USERNAME)
@@ -23,9 +22,10 @@ class RabbitHelper:
         )
         return connection
 
-    def get_oanda_publish_channel(self):
+    def configure_oanda_publish_channel(self):
         # initialize rabbitmq
-        channel = self.connection.channel()
+        connection = self.get_connection()
+        channel = connection.channel()
         channel.exchange_declare(exchange=cons.OANDA_PRICE_EXCHANGE, exchange_type='fanout')
 
         # queue 1
@@ -35,7 +35,7 @@ class RabbitHelper:
         # queue 2
         result = channel.queue_declare(queue=cons.OANDA_PRICE_QUEUE_2)
         channel.queue_bind(exchange=cons.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
-        return channel
+        self.oanda_publish_channel = channel
 
     def publish_oanda_price(self, price):
         self.oanda_publish_channel.basic_publish(exchange=cons.OANDA_PRICE_EXCHANGE,
@@ -43,7 +43,8 @@ class RabbitHelper:
                                                  body=price)
 
     def get_oanda_consume_channel(self, queue_name, callback):
-        channel = self.connection.channel()
+        connection = self.get_connection()
+        channel = connection.channel()
         channel.queue_declare(queue=queue_name)
         channel.basic_consume(queue=queue_name,
                               auto_ack=True,
