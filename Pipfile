@@ -1,0 +1,24 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+autopep8 = "*"
+
+[packages]
+v20 = "*"
+pandas = "*"
+asserts = "*"
+dotenv = "*"
+python-dotenv = "*"
+flask = "*"
+flask-cors = "*"
+pika = "*"
+pymongo = "*"
+redis = "*"
+finta = "*"
+plotly = "*"
+
+[requires]
+python_version = "3.7"
