@@ -18,7 +18,7 @@ def get_rabbit_connection():
     return connection
 
 
-def get_rabbit_publish_channel_for_oanda_prices(connection):
+def get_rabbit_publish_channel_for_oanda_prices(connection=None):
     if connection is None:
         connection = get_rabbit_connection()
 
@@ -33,4 +33,16 @@ def get_rabbit_publish_channel_for_oanda_prices(connection):
     # queue 2
     result = channel.queue_declare(queue=cons.OANDA_PRICE_QUEUE_2)
     channel.queue_bind(exchange=cons.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
+    return channel
+
+
+def get_rabbit_consume_channel_for_oanda_prices(queue_name, callback, connection=None):
+    if connection is None:
+        connection = get_rabbit_connection()
+
+    channel = connection.channel()
+    channel.queue_declare(queue=queue_name)
+    channel.basic_consume(queue=queue_name,
+                          auto_ack=True,
+                          on_message_callback=callback)
     return channel

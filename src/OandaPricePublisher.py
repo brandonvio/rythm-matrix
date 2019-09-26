@@ -13,22 +13,24 @@ from types import SimpleNamespace as Namespace
 from Types import Price, price_from_dict
 from Constants import cons
 from Environment import env
-from RabbitHelper import get_rabbit_publish_channel_for_oanda_prices, get_rabbit_connection
+from RabbitHelper2 import RabbitHelper
+
+rabbit_helper = RabbitHelper()
 
 
-def mongodb_loop(channel):
+def mongodb_loop():
     records = get_data_from_oanda_stream(10)
     # publish to queue
     for i, record in enumerate(records):
         time.sleep(1)
-        publish_price(channel, record)
+        publish_price(record)
 
 
-def oanda_stream(channel):
+def oanda_stream():
     accountID = env.get(cons.OANDA_DEFAULT_ACCOUNT)
     token = env.get(cons.OANDA_TOKEN)
     headers = {"Authorization": f"Bearer {token}"}
-    instruments = ["EUR_USD", "AUD_USD", "USD_CAD", "USD_CHF", "USD_JPY", "EUR_JPY", "GBP_USD"]
+    instruments = ["EUR_USD", "USD_JPY", "AUD_USD", "USD_CAD", "USD_CHF", "USD_JPY", "EUR_JPY", "GBP_USD"]
     instrument_url = ""
     for instrument in instruments:
         instrument_url = instrument_url + f"{instrument}%2C"
@@ -42,36 +44,27 @@ def oanda_stream(channel):
         if line:
             line = json.loads(line.decode('utf-8'))
             if line["type"] == "PRICE" and line["instrument"] == "EUR_USD":
-                publish_price(channel, line)
+                publish_price(line)
 
 
-def publish_price(channel, price_dict):
+def publish_price(price_dict):
     _price = price_from_dict(price_dict)
     print(_price.time, _price.instrument, _price.bid, _price.ask)
-    message = pickle.dumps(_price)
-    channel.basic_publish(exchange='oanda_prices',
-                          routing_key='',
-                          body=message)
+    _price = pickle.dumps(_price)
+    rabbit_helper.publish_oanda_price(_price)
 
 
 def main(run_mode):
-    # connection = get_rabbitmq_connection()
-    # channel = get_rabbitmq_channel(connection)
-    connection = get_rabbit_connection()
-    channel = get_rabbit_publish_channel_for_oanda_prices(connection)
-
     if run_mode == cons.RUN_MODE_LIVE:
         print('oanda_stream')
-        oanda_stream(channel)
+        oanda_stream()
     else:
         print('mongodb_loop')
-        mongodb_loop(channel)
-
-    connection.close()
+        mongodb_loop()
 
 
 if __name__ == "__main__":
-    redis_helper.set_run_mode_testing()
+    redis_helper.set_run_mode_live()
     run_mode = redis_helper.get_run_mode()
     print(f"======={run_mode}=======")
     main(run_mode)

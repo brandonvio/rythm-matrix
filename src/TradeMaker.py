@@ -3,16 +3,14 @@ import pickle
 import collections
 import pandas as pd
 from Types import Price
-from Constants import RUN_MODE_LIVE, RUN_MODE_TESTING
+from Constants import cons
 from RedisHelper import redis_helper
 from MongoHelper import get_testing_price_data
+from RabbitHelper2 import RabbitHelper
 from Stategy.DefaultScalp import get_trade
 
-global price_list
-price_list = None
-
-global run_mode
-run_mode = None
+price_list = []
+rabbit_helper = RabbitHelper()
 
 
 def callback(ch, method, properties, body):
@@ -45,29 +43,15 @@ def resample(df, interval):
     return df_resampled
 
 
-def main():
+def main(run_mode):
     global price_list
-    global run_mode
-    if run_mode == RUN_MODE_TESTING:
+    if run_mode == cons.RUN_MODE_TESTING:
         price_list = get_testing_price_data()
         print(len(price_list))
     else:
         price_list = []
 
-    credentials = pika.PlainCredentials('springcloud', '123456')
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters
-        (
-            host='localhost',
-            credentials=credentials
-        )
-    )
-    channel = connection.channel()
-    channel.queue_declare(queue='oanda_prices_q_1')
-    channel.basic_consume(queue='oanda_prices_q_1',
-                          auto_ack=True,
-                          on_message_callback=callback)
-
+    channel = rabbit_helper.get_oanda_consume_channel(cons.OANDA_PRICE_QUEUE_1, callback)
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
 
@@ -75,4 +59,4 @@ def main():
 if __name__ == "__main__":
     run_mode = redis_helper.get_run_mode()
     print("=======", run_mode, "=======")
-    main()
+    main(run_mode)
