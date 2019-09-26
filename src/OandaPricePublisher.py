@@ -1,21 +1,17 @@
 import pika
 import pickle
-import json
 import collections
-import requests
 import time
-from RedisHelper import redis_helper
-from dateutil import parser
-from bson.json_util import dumps
-from pymongo import MongoClient
-from MongoHelper import get_data_from_oanda_stream
-from types import SimpleNamespace as Namespace
 from Types import Price, price_from_dict
 from Constants import cons
 from Environment import env
+from OandaStream import OandaStream
 from RabbitHelper2 import RabbitHelper
+from RedisHelper import redis_helper
+from MongoHelper import get_data_from_oanda_stream
 
 rabbit_helper = RabbitHelper()
+oanda_stream = OandaStream()
 
 
 def mongodb_loop():
@@ -26,30 +22,9 @@ def mongodb_loop():
         publish_price(record)
 
 
-def oanda_stream():
-    accountID = env.get(cons.OANDA_DEFAULT_ACCOUNT)
-    token = env.get(cons.OANDA_TOKEN)
-    headers = {"Authorization": f"Bearer {token}"}
-    instruments = ["EUR_USD", "USD_JPY", "AUD_USD", "USD_CAD", "USD_CHF", "USD_JPY", "EUR_JPY", "GBP_USD"]
-    instrument_url = ""
-    for instrument in instruments:
-        instrument_url = instrument_url + f"{instrument}%2C"
-
-    stream_domain = env.get(cons.OANDA_STREAM_DOMAIN)
-    the_url = f"https://{stream_domain}/v3/accounts/{accountID}/pricing/stream?instruments={instrument_url}"
-    r = requests.get(the_url, stream=True, headers=headers)
-
-    print(">>>> Pricing service online! <<<<<")
-    for line in r.iter_lines():
-        if line:
-            line = json.loads(line.decode('utf-8'))
-            if line["type"] == "PRICE" and line["instrument"] == "EUR_USD":
-                publish_price(line)
-
-
 def publish_price(price_dict):
     _price = price_from_dict(price_dict)
-    print(_price.time, _price.instrument, _price.bid, _price.ask)
+    print(_price.time, _price.instrument, _price.ask, _price.bid)
     _price = pickle.dumps(_price)
     rabbit_helper.publish_oanda_price(_price)
 
@@ -57,7 +32,7 @@ def publish_price(price_dict):
 def main(run_mode):
     if run_mode == cons.RUN_MODE_LIVE:
         print('oanda_stream')
-        oanda_stream()
+        oanda_stream.stream(publish_price)
     else:
         print('mongodb_loop')
         mongodb_loop()

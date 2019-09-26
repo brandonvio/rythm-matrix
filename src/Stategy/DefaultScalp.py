@@ -9,11 +9,9 @@ def get_trade(data):
     # df_t['1H'] = resample(df, '1H')
     # trade = get_trade(df_t)
     # print(data)
-    dfh = data['1H']
-
-    row_1 = dfh.iloc[-1]
-
-    print("get_trade", row_1[row_1.index])
+    # dfh = data['1H']
+    # row_1 = dfh.iloc[-1]
+    # print("get_trade", row_1[row_1.index])
     return 0
 
 

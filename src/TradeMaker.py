@@ -16,11 +16,11 @@ rabbit_helper = RabbitHelper()
 def callback(ch, method, properties, body):
     global price_list
     price = pickle.loads(body)
-    print("TradeMaker", price)
+    print(f"TradeMaker {price.ask} {price.bid}")
     price_list.append(price)
     df = pd.DataFrame(price_list)
     df = df.set_index('time')
-    print(df.tail())
+    # print(df.tail())
     # print(len(df))
     df_t = {}
     df_t['tick'] = df
@@ -38,8 +38,8 @@ def resample(df, interval):
     # df_bid = df['bid'].resample(interval).ohlc()
     # df_resampled = pd.concat([df_ask, df_bid], axis=1, keys=['ask', 'bid'])
     df_resampled.fillna(method='ffill', inplace=True)
-    print(df_resampled.tail())
-    print("interval", interval, "len", len(df_resampled.index))
+    # print(df_resampled.tail())
+    # print("interval", interval, "len", len(df_resampled.index))
     return df_resampled
 
 
