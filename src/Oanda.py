@@ -44,7 +44,7 @@ class Oanda:
         transactions = response.get("transactions", 200)
         return transactions
 
-    def place_limit_order(self, instrument_id, price, stop_loss, take_profit, units, gtdTime):
+    def send_limit_order(self, instrument_id, price, stop_loss, take_profit, units, gtdTime):
         # TODO: Remove take profit, return better data.
         stop_loss = str(stop_loss)
         take_profit = str(take_profit)

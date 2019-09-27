@@ -3,7 +3,7 @@ from Environment import get_env
 from Constants import env
 
 
-class RabbitHelper:
+class _rabbit:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.oanda_publish_channel = None

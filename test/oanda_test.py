@@ -1,5 +1,4 @@
 from Oanda import Oanda
-from Trader import Trader
 import v20
 import os
 import pytest

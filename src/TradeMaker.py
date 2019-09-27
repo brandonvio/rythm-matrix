@@ -6,26 +6,28 @@ import pandas as pd
 from Types import Price
 from Constants import env
 from Constants import trd
-from RedisHelper import redis_
-from MongoHelper import get_testing_price_data
-from RabbitHelper2 import RabbitHelper
 from Stategy.DefaultScalp import get_trade
-import time
+from _rabbit import _rabbit
+from _redis import _redis
+from _time import _time
 
+rabbit = _rabbit()
+redis = _redis()
 
 price_list = []
-rabbit_helper = RabbitHelper()
 total_shorts = 0
 total_longs = 0
 total_notrade = 0
+total_spread_too_high = 0
 
 
 def callback(ch, method, properties, body):
     global total_longs
     global total_shorts
     global total_notrade
+    global total_spread_too_high
 
-    t0 = time.time()
+    t0 = _time.time()
     price = pickle.loads(body)
     print(f"TradeMaker {price.time} {price.ask} {price.bid} {price.mid} {price.spread}")
     price_list.append(price)
@@ -38,14 +40,15 @@ def callback(ch, method, properties, body):
         del price_list[0]
 
     if price.spread > 1.5:
+        total_spread_too_high = total_spread_too_high + 1
         print(f"Spread of {price.spread} is too high, no trade.")
         return
 
     trade = get_trade(price_list)
     if trade != trd.NO_TRADE:
         print("resetting prepare short/long")
-        redis_.set_bool(trd.PREPARE_SHORT, False)
-        redis_.set_bool(trd.PREPARE_LONG, False)
+        redis.set_bool(trd.PREPARE_SHORT, False)
+        redis.set_bool(trd.PREPARE_LONG, False)
 
     if trade == trd.NO_TRADE:
         total_notrade = total_notrade + 1
@@ -56,7 +59,7 @@ def callback(ch, method, properties, body):
     if trade == trd.SHORT_TRADE:
         total_shorts = total_shorts + 1
 
-    t1 = time.time()
+    t1 = _time.time()
     total_time = t1-t0
 
     print("trade:", trade)
@@ -64,10 +67,12 @@ def callback(ch, method, properties, body):
     print("total_longs:", total_longs)
     print("total_shorts:", total_shorts)
     print("total_notrade:", total_notrade)
-    redis_.set("total_time", total_time)
-    redis_.set("total_longs", total_longs)
-    redis_.set("total_shorts", total_shorts)
-    redis_.set("total_notrade", total_notrade)
+    print("total_spread_too_high:", total_spread_too_high)
+    redis.set("total_time", total_time)
+    redis.set("total_longs", total_longs)
+    redis.set("total_shorts", total_shorts)
+    redis.set("total_notrade", total_notrade)
+    redis.set("total_spread_too_high", total_spread_too_high)
 
 
 def resample(df, interval):
@@ -82,7 +87,7 @@ def resample(df, interval):
 
 def main(run_mode):
     try:
-        channel = rabbit_helper.get_oanda_consume_channel(env.OANDA_PRICE_QUEUE_1, callback)
+        channel = rabbit.get_oanda_consume_channel(env.OANDA_PRICE_QUEUE_1, callback)
         print(' [*] Waiting for messages. To exit press CTRL+C')
         channel.start_consuming()
     except pika.exceptions.StreamLostError:
@@ -95,13 +100,13 @@ def main(run_mode):
 
 if __name__ == "__main__":
     price_list = []
-    run_mode = redis_.get_run_mode()
-    redis_.set_bool(trd.PREPARE_SHORT, False)
-    redis_.set_bool(trd.PREPARE_LONG, False)
-    redis_.set("total_time", 0)
-    redis_.set("total_longs", 0)
-    redis_.set("total_shorts", 0)
-    redis_.set("total_notrade", 0)
+    run_mode = redis.get_run_mode()
+    redis.set_bool(trd.PREPARE_SHORT, False)
+    redis.set_bool(trd.PREPARE_LONG, False)
+    redis.set("total_time", 0)
+    redis.set("total_longs", 0)
+    redis.set("total_shorts", 0)
+    redis.set("total_notrade", 0)
 
     print(f"======={run_mode}=======")
     main(run_mode)
