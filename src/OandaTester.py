@@ -1,12 +1,12 @@
 from Oanda import Oanda
 from TimeHelper import utc_now
-from Environment import env
-from Constants import cons
+from Environment import get_env
+from Constants import env
 import v20
 
-access_token = env.get(cons.OANDA_TOKEN)
-account_id = env.get(cons.OANDA_DEFAULT_ACCOUNT)
-domain = env.get(cons.OANDA_TRADE_DOMAIN)
+access_token = get_env(env.OANDA_TOKEN)
+account_id = get_env(env.OANDA_DEFAULT_ACCOUNT)
+domain = get_env(env.OANDA_TRADE_DOMAIN)
 
 api = v20.Context(domain, 443, token=access_token)
 

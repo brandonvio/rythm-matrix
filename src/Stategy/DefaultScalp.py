@@ -1,28 +1,39 @@
 from finta import TA
-from RedisHelper import redis_helper
 import pandas as pd
 import numpy as np
+from RedisHelper import redis_
+from Constants import trd
 
 print("init strategy")
 trade_log = []
 
 
 def get_trade(price_dict):
-
+    # init dataframe.
     df = pd.DataFrame(price_dict)
     df = df.set_index('time')
     build_df(df)
 
+    # resample and get atr.
+    df_res1 = df['mid'].resample("30s").ohlc()
+    print("df_res1 len", len(df_res1))
+
+    atr = get_atr(df_res1, 10)
+    if atr < 0.00010:
+        print(f"ATR of {atr} is too low. No trade.")
+        return trd.NO_TRADE
+
     print("len(df)", len(df))
-    # int function
-    trade = 0
+
+    # int trade.
+    trade = trd.NO_TRADE
     current_row = df.iloc[-1]
 
-    # get trend direction
+    # get trend direction.
     _trend = get_trend(current_row["ema_trend_up"], current_row["ema_trend_down"])
     if _trend == 0:
         trade_log.append("no trend, no trade.")
-        return 0  # no trade
+        return trd.NO_TRADE  # no trade
 
     # get current price relative to fast ema (ema_1).
     current_price_to_ema_1 = -1
@@ -31,49 +42,57 @@ def get_trade(price_dict):
 
     # trend is down
     if _trend == -1:
-        prepare_short = redis_helper.get_bool("prepare_short")
+        prepare_short = redis_.get_bool(trd.PREPARE_SHORT)
         print("prepare_short:", prepare_short)
         # if price is higher than fast ema, prepare short.
         if current_price_to_ema_1 == 1:
             if not prepare_short:
-                redis_helper.set_bool("prepare_short", True)
+                redis_.set_bool(trd.PREPARE_SHORT, True)
                 log(f"{current_row.name}, short prepared.")
         else:
-            # if price is lower than emas, check prepare short, if true, return -1 for short trade.
+            # if price is lower than emas, check prepare short.
             if prepare_short:
                 log(f"{current_row.name}, return short.")
-                trade = -1
+                trade = trd.SHORT_TRADE
 
     # trend is up
     if _trend == 1:
-        prepare_long = redis_helper.get_bool("prepare_long")
+        prepare_long = redis_.get_bool(trd.PREPARE_LONG)
         print("prepare_long:", prepare_long)
         # if price is lower than fast ema, prepare long.
         if current_price_to_ema_1 == -1:
             if not prepare_long:
-                redis_helper.set_bool("prepare_long", True)
+                redis_.set_bool(trd.PREPARE_LONG, True)
                 log(f"{current_row.name}, long prepared.")
         else:
-            # if price is lower than emas, check prepare long, if true, return 1 for long trade.
+            # if price is lower than emas, check prepare long.
             if prepare_long:
                 log(f"{current_row.name}, return long.")
-                trade = 1
+                trade = trd.LONG_TRADE
 
     return (trade)
 
 
 def build_df(df):
-    # df["sma_0"] = pd.Series.rolling(df['ask'], window=400).mean()
-    # df["sma_1"] = pd.Series.rolling(df['ask'], window=100).mean()
-    # df["sma_2"] = pd.Series.rolling(df['ask'], window=400).mean()
-    # df["sma_4"] = pd.Series.rolling(df['ask'], window=500).mean()
-    df["ema_0"] = pd.Series.ewm(df['ask'], span=10).mean()
-    df["ema_1"] = pd.Series.ewm(df['ask'], span=200).mean()
-    df["ema_2"] = pd.Series.ewm(df['ask'], span=300).mean()
-    df["ema_3"] = pd.Series.ewm(df['ask'], span=400).mean()
+    # df["sma_0"] = pd.Series.rolling(df['mid'], window=400).mean()
+    # df["sma_1"] = pd.Series.rolling(df['mid'], window=100).mean()
+    # df["sma_2"] = pd.Series.rolling(df['mid'], window=400).mean()
+    # df["sma_4"] = pd.Series.rolling(df['mid'], window=500).mean()
+    df["ema_0"] = pd.Series.ewm(df['mid'], span=10).mean()
+    df["ema_1"] = pd.Series.ewm(df['mid'], span=200).mean()
+    df["ema_2"] = pd.Series.ewm(df['mid'], span=300).mean()
+    df["ema_3"] = pd.Series.ewm(df['mid'], span=400).mean()
     df.dropna(inplace=True)
     df["ema_trend_up"] = np.where((df['ema_1'] > df['ema_2']) & (df["ema_2"] > df["ema_3"]), True, False)
     df["ema_trend_down"] = np.where((df['ema_1'] < df['ema_2']) & (df["ema_2"] < df["ema_3"]), True, False)
+
+
+def get_atr(df, interval):
+    df["ATR10"] = TA.ATR(df, interval)
+    current_row = df.iloc[-1]
+    return current_row["ATR10"]
+    # df_bid = df['bid'].resample(interval).ohlc()
+    # df_resampled = pd.concat([df_ask, df_bid], axis=1, keys=['mid', 'bid'])
 
 
 def log(message):

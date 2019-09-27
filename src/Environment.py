@@ -2,9 +2,8 @@ import os
 from dotenv import load_dotenv
 
 
-class env:
-    load_dotenv()
+load_dotenv()
 
-    @staticmethod
-    def get(name):
-        return os.getenv(name)
+
+def get_env(name):
+    return os.getenv(name)

@@ -2,8 +2,8 @@ import sys
 import json
 import v20
 import requests
-from Environment import env
-from Constants import cons
+from Environment import get_env
+from Constants import env
 from ColorPrint import *
 
 
@@ -11,8 +11,8 @@ class Oanda:
     def __init__(self, api, accountID, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.accountID = accountID
-        self.oanda_trade_domain = env.get(cons.OANDA_TRADE_DOMAIN)
-        self.oanda_token = env.get(cons.OANDA_TOKEN)
+        self.oanda_trade_domain = get_env(env.OANDA_TRADE_DOMAIN)
+        self.oanda_token = get_env(env.OANDA_TOKEN)
         self.api = api
         self.configure_endpoints()
 

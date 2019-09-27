@@ -1,20 +1,20 @@
 import json
 import requests
-from Constants import cons
-from Environment import env
+from Constants import env
+from Environment import get_env
 
 
 class OandaStream:
     def stream(self, callback):
-        accountID = env.get(cons.OANDA_DEFAULT_ACCOUNT)
-        token = env.get(cons.OANDA_TOKEN)
+        accountID = get_env(env.OANDA_DEFAULT_ACCOUNT)
+        token = get_env(env.OANDA_TOKEN)
         headers = {"Authorization": f"Bearer {token}"}
         instruments = ["EUR_USD", "USD_JPY", "AUD_USD", "USD_CAD", "USD_CHF", "USD_JPY", "EUR_JPY", "GBP_USD"]
         instrument_url = ""
         for instrument in instruments:
             instrument_url = instrument_url + f"{instrument}%2C"
 
-        stream_domain = env.get(cons.OANDA_STREAM_DOMAIN)
+        stream_domain = get_env(env.OANDA_STREAM_DOMAIN)
         the_url = f"https://{stream_domain}/v3/accounts/{accountID}/pricing/stream?instruments={instrument_url}"
         r = requests.get(the_url, stream=True, headers=headers)
 

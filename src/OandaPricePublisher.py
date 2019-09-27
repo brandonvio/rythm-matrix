@@ -3,11 +3,11 @@ import pickle
 import collections
 import time
 from Types import Price, price_from_dict
-from Constants import cons
-from Environment import env
+from Constants import env
+from Environment import get_env
 from OandaStream import OandaStream
 from RabbitHelper2 import RabbitHelper
-from RedisHelper import redis_helper
+from RedisHelper import redis_
 from MongoHelper import get_data_from_oanda_stream
 
 rabbit_helper = RabbitHelper()
@@ -15,7 +15,7 @@ oanda_stream = OandaStream()
 
 
 def mongodb_loop():
-    records = get_data_from_oanda_stream(2000)
+    records = get_data_from_oanda_stream(100000)
     # publish to queue
     for i, record in enumerate(records):
         # time.sleep(1)
@@ -30,9 +30,9 @@ def publish_price(price_dict):
 
 
 def main(run_mode):
-    # redis_helper.set_run_mode_live()
+    # redis_.set_run_mode_live()
     rabbit_helper.configure_oanda_publish_channel()
-    if run_mode == cons.RUN_MODE_LIVE:
+    if run_mode == env.RUN_MODE_LIVE:
         print('oanda_stream')
         oanda_stream.stream(publish_price)
     else:
@@ -41,7 +41,7 @@ def main(run_mode):
 
 
 if __name__ == "__main__":
-    redis_helper.set_run_mode_testing()
-    run_mode = redis_helper.get_run_mode()
+    redis_.set_run_mode_testing()
+    run_mode = redis_.get_run_mode()
     print(f"======={run_mode}=======")
     main(run_mode)

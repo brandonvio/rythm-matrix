@@ -1,8 +1,8 @@
 import pymongo
 from pymongo import MongoClient
 from Types import price_from_dict
-from Environment import env
-from Constants import cons
+from Environment import get_env
+from Constants import env
 
 
 def get_data_from_oanda_stream(record_limit):
@@ -11,8 +11,8 @@ def get_data_from_oanda_stream(record_limit):
     result = client.matrix_data.oanda_stream.find(
         {
             'time': {
-                '$gt': "2019-09-17T04:00:00Z",
-                '$lt': "2019-09-17T17:00:00Z"
+                '$gt': "2019-09-17T06:00:00Z",
+                '$lt': "2019-09-17T14:00:00Z"
             },
             'instrument': 'EUR_USD'
         },
@@ -40,7 +40,7 @@ def get_testing_price_data():
 
 
 def get_mongo_client():
-    uri = env.get(cons.MONGODB_FULL_URL)
+    uri = get_env(env.MONGODB_FULL_URL)
     client = MongoClient(uri)
     return client
 

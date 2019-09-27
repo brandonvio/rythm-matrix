@@ -1,6 +1,6 @@
 import pika
-from Environment import env
-from Constants import cons
+from Environment import get_env
+from Constants import env
 
 
 class RabbitHelper:
@@ -9,9 +9,9 @@ class RabbitHelper:
         self.oanda_publish_channel = None
 
     def get_connection(self):
-        username = env.get(cons.RABBIT_USERNAME)
-        password = env.get(cons.RABBIT_PASSWORD)
-        host = env.get(cons.RABBIT_DOMAIN)
+        username = get_env(env.RABBIT_USERNAME)
+        password = get_env(env.RABBIT_PASSWORD)
+        host = get_env(env.RABBIT_DOMAIN)
         credentials = pika.PlainCredentials(username, password)
         connection = pika.BlockingConnection(
             pika.ConnectionParameters
@@ -26,19 +26,19 @@ class RabbitHelper:
         # initialize rabbitmq
         connection = self.get_connection()
         channel = connection.channel()
-        channel.exchange_declare(exchange=cons.OANDA_PRICE_EXCHANGE, exchange_type='fanout')
+        channel.exchange_declare(exchange=env.OANDA_PRICE_EXCHANGE, exchange_type='fanout')
 
         # queue 1
-        result = channel.queue_declare(queue=cons.OANDA_PRICE_QUEUE_1)
-        channel.queue_bind(exchange=cons.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
+        result = channel.queue_declare(queue=env.OANDA_PRICE_QUEUE_1)
+        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
 
         # queue 2
-        result = channel.queue_declare(queue=cons.OANDA_PRICE_QUEUE_2)
-        channel.queue_bind(exchange=cons.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
+        result = channel.queue_declare(queue=env.OANDA_PRICE_QUEUE_2)
+        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
         self.oanda_publish_channel = channel
 
     def publish_oanda_price(self, price):
-        self.oanda_publish_channel.basic_publish(exchange=cons.OANDA_PRICE_EXCHANGE,
+        self.oanda_publish_channel.basic_publish(exchange=env.OANDA_PRICE_EXCHANGE,
                                                  routing_key='',
                                                  body=price)
 

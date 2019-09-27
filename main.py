@@ -1,14 +1,14 @@
 import logging
 import v20
-from Constants import cons
-from Environment import env
+from Constants import env
+from Environment import get_env
 from flask import Flask, escape, request, jsonify
 from flask_cors import CORS
 from Oanda import Oanda
 
-access_token = env.get(cons.OANDA_TOKEN)
-account_id = env.get(cons.OANDA_DEFAULT_ACCOUNT)
-oanda_trade_domain = env.get(cons.OANDA_TRADE_DOMAIN)
+access_token = get_env(env.OANDA_TOKEN)
+account_id = get_env(env.OANDA_DEFAULT_ACCOUNT)
+oanda_trade_domain = get_env(env.OANDA_TRADE_DOMAIN)
 api = v20.Context(oanda_trade_domain, 443, token=access_token)
 
 oa = Oanda(api, account_id)
