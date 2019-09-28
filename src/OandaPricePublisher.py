@@ -17,7 +17,7 @@ oanda_stream = OandaStream()
 
 
 def mongodb_loop():
-    records = mongo.get_data_from_oanda_stream(100000)
+    records = mongo.get_data_from_oanda_stream(4000)
     # publish to queue
     for i, record in enumerate(records):
         # time.sleep(1)

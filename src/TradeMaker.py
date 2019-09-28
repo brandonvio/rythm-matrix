@@ -3,7 +3,10 @@ import pika.exceptions
 import pickle
 import collections
 import pandas as pd
+from Trader import Trader
+from TraderStub import TraderStub
 from Types import Price
+from Types import PreOrder
 from Constants import env
 from Constants import trd
 from Stategy.DefaultScalp import get_trade
@@ -13,6 +16,8 @@ from _time import _time
 
 rabbit = _rabbit()
 redis = _redis()
+# trader = Trader(Trader.get_dependencies())
+trader = TraderStub()
 
 price_list = []
 total_shorts = 0
@@ -26,6 +31,8 @@ def callback(ch, method, properties, body):
     global total_shorts
     global total_notrade
     global total_spread_too_high
+
+    position_size, take_profit_pips, stop_loss_pips, fill_type = 50, 0.0001, 0.0005, "GTC"
 
     t0 = _time.time()
     price = pickle.loads(body)
@@ -49,6 +56,16 @@ def callback(ch, method, properties, body):
         print("resetting prepare short/long")
         redis.set_bool(trd.PREPARE_SHORT, False)
         redis.set_bool(trd.PREPARE_LONG, False)
+        trader.send_order(
+            PreOrder(ask=price.ask,
+                     bid=price.bid,
+                     instrument=price.instrument,
+                     position_type=trade,
+                     position_size=position_size,
+                     take_profit_pips=take_profit_pips,
+                     stop_loss_pips=stop_loss_pips,
+                     fill_type=fill_type)
+        )
 
     if trade == trd.NO_TRADE:
         total_notrade = total_notrade + 1
@@ -83,6 +100,11 @@ def resample(df, interval):
     # print(df_resampled.tail())
     # print("interval", interval, "len", len(df_resampled.index))
     return df_resampled
+
+
+def get_trader():
+    oar, oac, twillio = Trader.get_dependencies()
+    return Trader(oar, oac, twillio)
 
 
 def main(run_mode):

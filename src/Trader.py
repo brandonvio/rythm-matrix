@@ -1,70 +1,97 @@
-import pandas as pd
 from ColorPrint import *
+from Types import Order
+from Types import PreOrder
+from Constants import trd
+from OandaClient import OandaClient
+from OandaRest import OandaRest
 from _twilio import _twilio
 from _time import _time
+from _converter import _converter
 
-twilio = _twilio()
+# domain, token, account = OandaRest.get_dependencies()
 
 
 class Trader:
-    def __init__(self):
-        self._take_profit_pips = 0.0001
-        self._stop_loss_pips = 0.0005
+    def __init__(self, oanda_rest: OandaRest, oanda_client: OandaClient, twilio: _twilio):
+        self.oanda_rest = oanda_rest
+        self.oanda_client = oanda_client
+        self.twilio = twilio
 
-    def create_position(self, ask, bid, instrument_id, position_size, the_signal):
-        if self.has_open_postion(instrument_id):
-            log(f"Position already open for {instrument_id}. No trade.")
+    def calculate_long(self, pre_order: PreOrder):
+        open_price = pre_order.ask
+        take_profit = pre_order.ask + pre_order.take_profit_pips
+        stop_loss = pre_order.bid - pre_order.stop_loss_pips
+        position_size = pre_order.position_size
+        return open_price, stop_loss, take_profit, position_size
+
+    def calculate_short(self, pre_order: PreOrder):
+        open_price = pre_order.bid
+        take_profit = pre_order.bid + (pre_order.take_profit_pips * -1)
+        stop_loss = pre_order.ask - (pre_order.stop_loss_pips * -1)
+        position_size = pre_order.position_size * -1
+        return open_price, stop_loss, take_profit, position_size
+
+    def send_order(self, pre_order: PreOrder):
+        if self.has_open_postion(pre_order.instrument):
+            log(f"Position already open for {pre_order.instrument}. No trade.")
             return False
 
-        # Based on long (1) or short (-1) configure trade parameters.
-        if the_signal == 1:
-            amount_for_stop_loss = self._stop_loss_pips
-            amount_for_take_profit = self._take_profit_pips
-            position_size = position_size
-            stop_loss = round(bid - amount_for_stop_loss, 5)
-            take_profit = round(ask + amount_for_take_profit, 5)
-            the_price = round(ask, 5)
-        elif the_signal == -1:
-            amount_for_stop_loss = self._stop_loss_pips * -1
-            amount_for_take_profit = self._take_profit_pips * -1
-            position_size = position_size * -1
-            stop_loss = round(ask - amount_for_stop_loss, 5)
-            take_profit = round(bid + amount_for_take_profit, 5)
-            the_price = round(bid, 5)
-
-        # Place the order.
-        the_time = str(_time.utc_now())
-
-        # TODO replace broker api with Oanda.
-        result = self._broker_api.place_limit_order(
-            instrument_id,
-            the_price,
-            stop_loss,
-            take_profit,
-            position_size,
-            the_time)
-
-        if result:
-            message = f"Success. Market order placed for {instrument_id} with stop loss of {stop_loss} and take profit of {take_profit}."
-            twilio.send_message(message)
+        # Calculate order if long or short.
+        if pre_order.position_type == trd.LONG_TRADE:
+            open_price, stop_loss, take_profit, position_size = self.calculate_long(pre_order)
         else:
-            message = f"Failure. Market order failed for {instrument_id} with stop loss of {stop_loss} and take profit of {take_profit}."
-            twilio.send_message(message)
+            open_price, stop_loss, take_profit, position_size = self.calculate_short(pre_order)
+
+        order = Order(
+            instrument=pre_order.instrument,
+            position_size=str(position_size),
+            open_price=_converter.round4str(open_price),
+            take_profit=_converter.round5str(take_profit),
+            stop_loss=_converter.round5str(stop_loss),
+            fill_type=pre_order.fill_type
+        )
+
+        # Send order to Oanda server.
+        result = self.oanda.send_limit_order(order)
+
+        # Process result.
+        if result:
+            message = f"Success. Market order placed for {pre_order.instrument} with stop loss of {stop_loss} and take profit of {take_profit}."
+            self.twilio.send_message(message)
+        else:
+            message = f"Failure. Market order failed for {pre_order.instrument} with stop loss of {stop_loss} and take profit of {take_profit}."
+            self.twilio.send_message(message)
         return True
 
-    def has_open_position(self, instrument_id):
+    def has_open_position(self, instrument):
         open_position = False
+
         # get openn positions from api.
-        positions = self._broker_api.get_open_positions()
+        positions = self.oanda_client.get_open_positions()
 
         # Check to see if position is already open for this instrument.
         for position in positions:
             log(position["instrument"])
-            if position["instrument"] == instrument_id:
+            if position["instrument"] == instrument:
                 open_position = True
                 break
 
         return open_position
+
+    @staticmethod
+    def get_dependencies():
+        # oanda rest
+        domain, token, account = OandaRest.get_dependencies()
+        oar = OandaRest(domain, token, account)
+
+        # oanda client
+        api, account_id = OandaClient.get_dependencies()
+        oac = OandaClient(api, account_id)
+
+        # twilio
+        twilio = _twilio()
+
+        return oar, oac, twilio
 
 
 def log(message):

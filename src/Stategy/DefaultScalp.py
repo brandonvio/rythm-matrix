@@ -1,9 +1,10 @@
-from finta import TA
 import pandas as pd
 import numpy as np
-from RedisHelper import redis_
+from finta import TA
 from Constants import trd
+from _redis import _redis
 
+redis = _redis()
 print("init strategy")
 trade_log = []
 
@@ -42,12 +43,12 @@ def get_trade(price_dict):
 
     # trend is down
     if _trend == -1:
-        prepare_short = redis_.get_bool(trd.PREPARE_SHORT)
+        prepare_short = redis.get_bool(trd.PREPARE_SHORT)
         print("prepare_short:", prepare_short)
         # if price is higher than fast ema, prepare short.
         if current_price_to_ema_1 == 1:
             if not prepare_short:
-                redis_.set_bool(trd.PREPARE_SHORT, True)
+                redis.set_bool(trd.PREPARE_SHORT, True)
                 log(f"{current_row.name}, short prepared.")
         else:
             # if price is lower than emas, check prepare short.
@@ -57,12 +58,12 @@ def get_trade(price_dict):
 
     # trend is up
     if _trend == 1:
-        prepare_long = redis_.get_bool(trd.PREPARE_LONG)
+        prepare_long = redis.get_bool(trd.PREPARE_LONG)
         print("prepare_long:", prepare_long)
         # if price is lower than fast ema, prepare long.
         if current_price_to_ema_1 == -1:
             if not prepare_long:
-                redis_.set_bool(trd.PREPARE_LONG, True)
+                redis.set_bool(trd.PREPARE_LONG, True)
                 log(f"{current_row.name}, long prepared.")
         else:
             # if price is lower than emas, check prepare long.

@@ -19,6 +19,32 @@ Price = collections.namedtuple(
     ]
 )
 
+Order = collections.namedtuple(
+    "Order",
+    [
+        "instrument",
+        "position_size",
+        "open_price",
+        "take_profit",
+        "stop_loss",
+        "time_in_force"
+    ]
+)
+
+PreOrder = collections.namedtuple(
+    "PreOrder",
+    [
+        "ask",
+        "bid",
+        "instrument",
+        "position_type",
+        "position_size",
+        "take_profit_pips",
+        "stop_loss_pips",
+        "fill_type"
+    ]
+)
+
 
 def price_from_dict(price_dict):
     ask = float(price_dict["asks"][0]["price"])
