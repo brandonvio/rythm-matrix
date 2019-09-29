@@ -1,10 +1,10 @@
 import pika
 import pika.exceptions
-import pickle
 import collections
 import pandas as pd
+import sys
+
 from Trader import Trader
-from TraderStub import TraderStub
 from Types import Price
 from Types import PreOrder
 from Constants import env
@@ -14,10 +14,11 @@ from _rabbit import _rabbit
 from _redis import _redis
 from _time import _time
 
+module_name = "TradeMaker"
 rabbit = _rabbit()
 redis = _redis()
-# trader = Trader(Trader.get_dependencies())
-trader = TraderStub()
+# trader = Trader(*Trader.get_dependencies())
+trader = Trader(*Trader.get_dependencies_bt())
 
 price_list = []
 total_shorts = 0
@@ -32,12 +33,15 @@ def callback(ch, method, properties, body):
     global total_notrade
     global total_spread_too_high
 
+    # start timer.
+    t0 = _time.time()
+
+    # trading configurables.
     position_size, take_profit_pips, stop_loss_pips, fill_type = 50, 0.0001, 0.0005, "GTC"
 
-    t0 = _time.time()
-    price = pickle.loads(body)
-    print(f"TradeMaker {price.time} {price.ask} {price.bid} {price.mid} {price.spread}")
-    price_list.append(price)
+    price = Price.from_json(body)
+    print(module_name, price.time, price.instrument, price.ask, price.bid)
+    price_list.append(price.to_simple_dict())
     price_list_len = len(price_list)
 
     if (price_list_len < 500):
@@ -100,11 +104,6 @@ def resample(df, interval):
     # print(df_resampled.tail())
     # print("interval", interval, "len", len(df_resampled.index))
     return df_resampled
-
-
-def get_trader():
-    oar, oac, twillio = Trader.get_dependencies()
-    return Trader(oar, oac, twillio)
 
 
 def main(run_mode):

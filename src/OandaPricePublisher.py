@@ -1,7 +1,6 @@
 import pika
-import pickle
-import collections
-from Types import Price, price_from_dict
+import sys
+from Types import Price
 from Constants import env
 from Environment import get_env
 from OandaStream import OandaStream
@@ -10,6 +9,7 @@ from _redis import _redis
 from _mongo import _mongo
 from _time import _time
 
+module_name = "OandaPricePublisher"
 rabbit = _rabbit()
 redis = _redis()
 mongo = _mongo()
@@ -25,9 +25,9 @@ def mongodb_loop():
 
 
 def publish_price(price_dict):
-    price = price_from_dict(price_dict)
-    print(price.time, price.instrument, price.ask, price.bid)
-    price = pickle.dumps(price)
+    price = Price.from_origin(price_dict)
+    print(module_name, price.time, price.instrument, price.ask, price.bid)
+    price = price.to_json()
     rabbit.publish_oanda_price(price)
 
 

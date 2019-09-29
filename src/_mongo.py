@@ -1,6 +1,5 @@
 import pymongo
 from pymongo import MongoClient
-from Types import price_from_dict
 from Environment import get_env
 from Constants import env
 from _time import _time
@@ -36,10 +35,7 @@ class _mongo:
                 'instrument': 'EUR_USD'
             }).sort("time", pymongo.DESCENDING)
 
-        _list = list(result)
-        price_list = []
-        for _price in _list:
-            price_list.append(price_from_dict(_price))
+        price_list = list(result)
         return price_list
 
     def log(self, message, log_type):

@@ -8,6 +8,10 @@ from _twilio import _twilio
 from _time import _time
 from _converter import _converter
 
+# backtesting
+from BackTesting.OandaClient import OandaClient as OandaClientBT
+from BackTesting.OandaRest import OandaRest as OandaRestBT
+from BackTesting._twilio import _twilio as _twilioBT
 # domain, token, account = OandaRest.get_dependencies()
 
 
@@ -32,7 +36,7 @@ class Trader:
         return open_price, stop_loss, take_profit, position_size
 
     def send_order(self, pre_order: PreOrder):
-        if self.has_open_postion(pre_order.instrument):
+        if self.has_open_position(pre_order.instrument):
             log(f"Position already open for {pre_order.instrument}. No trade.")
             return False
 
@@ -48,11 +52,12 @@ class Trader:
             open_price=_converter.round4str(open_price),
             take_profit=_converter.round5str(take_profit),
             stop_loss=_converter.round5str(stop_loss),
-            fill_type=pre_order.fill_type
+            fill_type=pre_order.fill_type,
+            time_in_force=(str(_time.utc_now()))
         )
 
         # Send order to Oanda server.
-        result = self.oanda.send_limit_order(order)
+        result = self.oanda_rest.send_limit_order(order)
 
         # Process result.
         if result:
@@ -91,6 +96,13 @@ class Trader:
         # twilio
         twilio = _twilio()
 
+        return oar, oac, twilio
+
+    @staticmethod
+    def get_dependencies_bt():
+        oar = OandaRestBT()
+        oac = OandaClientBT()
+        twilio = _twilioBT()
         return oar, oac, twilio
 
 

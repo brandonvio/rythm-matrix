@@ -1,6 +1,7 @@
 import pytz
 import time
 from datetime import datetime
+from dateutil.parser import parse
 
 
 class _time:
@@ -17,3 +18,7 @@ class _time:
     @staticmethod
     def time():
         return time.time()
+
+    @staticmethod
+    def datetime_parse(value):
+        return parse(value)

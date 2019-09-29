@@ -21,6 +21,8 @@ finta = "*"
 plotly = "*"
 termcolor = "*"
 twilio = "*"
+jsonify = "*"
+jsonpickle = "*"
 
 [requires]
 python_version = "3.7"
