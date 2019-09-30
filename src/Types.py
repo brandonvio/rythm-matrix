@@ -94,7 +94,6 @@ class Order(BaseType):
         self.take_profit = kwargs["take_profit"]
         self.stop_loss = kwargs["stop_loss"]
         self.time_in_force = kwargs["time_in_force"]
-        self.fill_type = kwargs["fill_type"]
 
     def to_dict(self):
         return {
@@ -103,8 +102,7 @@ class Order(BaseType):
             "open_price": self.open_price,
             "take_profit": self.take_profit,
             "stop_loss": self.stop_loss,
-            "time_in_force": self.time_in_force,
-            "fill_type": self.fill_type
+            "time_in_force": self.time_in_force
         }
 
 
@@ -117,7 +115,7 @@ class PreOrder(BaseType):
         self.position_size = kwargs["position_size"]
         self.take_profit_pips = kwargs["take_profit_pips"]
         self.stop_loss_pips = kwargs["stop_loss_pips"]
-        self.fill_type = kwargs["fill_type"]
+        self.time_in_force = kwargs["time_in_force"]
 
     def to_dict(self):
         return {
@@ -128,5 +126,5 @@ class PreOrder(BaseType):
             "position_size": self.position_size,
             "take_profit_pips": self.take_profit_pips,
             "stop_loss_pips": self.stop_loss_pips,
-            "fill_type": self.fill_type
+            "time_in_force": self.time_in_force
         }

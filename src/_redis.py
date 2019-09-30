@@ -62,6 +62,9 @@ class _redis():
     def expire_now(self, name):
         self.redis.expire(name, 0)
 
+    def incr_one(self, name):
+        self.redis.incr(name, 1)
+
 
 if __name__ == "__main__":
     redis = _redis()

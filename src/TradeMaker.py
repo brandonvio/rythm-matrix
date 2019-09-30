@@ -17,27 +17,18 @@ from _time import _time
 module_name = "TradeMaker"
 rabbit = _rabbit()
 redis = _redis()
+
 # trader = Trader(*Trader.get_dependencies())
 trader = Trader(*Trader.get_dependencies_bt())
-
 price_list = []
-total_shorts = 0
-total_longs = 0
-total_notrade = 0
-total_spread_too_high = 0
 
 
 def callback(ch, method, properties, body):
-    global total_longs
-    global total_shorts
-    global total_notrade
-    global total_spread_too_high
-
     # start timer.
     t0 = _time.time()
 
     # trading configurables.
-    position_size, take_profit_pips, stop_loss_pips, fill_type = 50, 0.0001, 0.0005, "GTC"
+    position_size, take_profit_pips, stop_loss_pips, time_in_force = 50, 0.0001, 0.0005, "GTC"
 
     price = Price.from_json(body)
     print(module_name, price.time, price.instrument, price.ask, price.bid)
@@ -51,7 +42,7 @@ def callback(ch, method, properties, body):
         del price_list[0]
 
     if price.spread > 1.5:
-        total_spread_too_high = total_spread_too_high + 1
+        redis.incr_one("total_spread_too_high")
         print(f"Spread of {price.spread} is too high, no trade.")
         return
 
@@ -68,32 +59,22 @@ def callback(ch, method, properties, body):
                      position_size=position_size,
                      take_profit_pips=take_profit_pips,
                      stop_loss_pips=stop_loss_pips,
-                     fill_type=fill_type)
+                     time_in_force=time_in_force)
         )
 
-    if trade == trd.NO_TRADE:
-        total_notrade = total_notrade + 1
-
-    if trade == trd.LONG_TRADE:
-        total_longs = total_longs + 1
-
-    if trade == trd.SHORT_TRADE:
-        total_shorts = total_shorts + 1
+    redis.incr_one(trade)
 
     t1 = _time.time()
     total_time = t1-t0
 
     print("trade:", trade)
     print("total_time:", total_time)
-    print("total_longs:", total_longs)
-    print("total_shorts:", total_shorts)
-    print("total_notrade:", total_notrade)
-    print("total_spread_too_high:", total_spread_too_high)
-    redis.set("total_time", total_time)
-    redis.set("total_longs", total_longs)
-    redis.set("total_shorts", total_shorts)
-    redis.set("total_notrade", total_notrade)
-    redis.set("total_spread_too_high", total_spread_too_high)
+
+    # get values from redis
+    print("total_longs:", redis.get(trd.LONG_TRADE))
+    print("total_shorts:", redis.get(trd.SHORT_TRADE))
+    print("total_notrade:", redis.get(trd.NO_TRADE))
+    print("total_spread_too_high:", redis.get("total_spread_too_high"))
 
 
 def resample(df, interval):
@@ -128,6 +109,7 @@ if __name__ == "__main__":
     redis.set("total_longs", 0)
     redis.set("total_shorts", 0)
     redis.set("total_notrade", 0)
+    redis.expire_now("order_log")
 
     print(f"======={run_mode}=======")
     main(run_mode)

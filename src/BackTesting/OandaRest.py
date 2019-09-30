@@ -1,13 +1,12 @@
 from ColorPrint import *
+from Types import Order
 from _redis import _redis
-import jsonpickle
 
 redis = _redis()
 
 
 class OandaRest:
-    def send_limit_order(self, order):
+    def send_limit_order(self, order: Order):
         cprintg(order)
-        x = jsonpickle.encode(order)
-        redis.rpush("order_log", x)
+        redis.rpush("order_log", order.to_json())
         return True

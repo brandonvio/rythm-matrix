@@ -46,12 +46,13 @@ class OandaRest(Oanda):
 
         result = False
         if status_code == 201:
-            if resp.has_key("orderFillTransaction"):
+            response_keys = resp.keys()
+            if "orderFillTransaction" in response_keys:
                 trade_id = resp["orderFillTransaction"]["tradeOpened"]["tradeID"]
                 filled_price = resp["orderFillTransaction"]["tradeOpened"]["price"]
                 cprintg(f"Order filled for {order.instrument}. TradeID {trade_id}. Filled at {filled_price}.")
                 result = True
-            elif "orderCreateTransaction" in resp.keys():
+            elif "orderCreateTransaction" in response_keys:
                 pass
             else:
                 pass

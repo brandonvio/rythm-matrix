@@ -26,6 +26,10 @@ class OandaClient:
         response = self.api.position.list_open(self.account_id).get("positions", 200)
         return response
 
+    def get_pending_orders(self):
+        response = self.api.order.list_pending(self.account_id).get("orders", 200)
+        return response
+
     def get_transaction_list(self):
         response = self.api.transaction.list(self.account_id)
         transaction_list = {}

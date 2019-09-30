@@ -40,6 +40,10 @@ class Trader:
             log(f"Position already open for {pre_order.instrument}. No trade.")
             return False
 
+        if self.has_pending_order(pre_order.instrument):
+            log(f"Order pending for {pre_order.instrument}. No trade.")
+            return False
+
         # Calculate order if long or short.
         if pre_order.position_type == trd.LONG_TRADE:
             open_price, stop_loss, take_profit, position_size = self.calculate_long(pre_order)
@@ -49,11 +53,10 @@ class Trader:
         order = Order(
             instrument=pre_order.instrument,
             position_size=str(position_size),
-            open_price=_converter.round4str(open_price),
+            open_price=_converter.round5str(open_price),
             take_profit=_converter.round5str(take_profit),
             stop_loss=_converter.round5str(stop_loss),
-            fill_type=pre_order.fill_type,
-            time_in_force=(str(_time.utc_now()))
+            time_in_force=pre_order.time_in_force
         )
 
         # Send order to Oanda server.
@@ -68,16 +71,28 @@ class Trader:
             self.twilio.send_message(message)
         return True
 
+    def has_pending_order(self, instrument):
+        pending_order = False
+
+        # get openn positions from api.
+        orders = self.oanda_client.get_pending_orders()
+        # Check to see if position is already open for this instrument.
+        for order in orders:
+            if order.instrument == instrument:
+                pending_order = True
+                break
+
+        return pending_order
+
     def has_open_position(self, instrument):
         open_position = False
 
         # get openn positions from api.
         positions = self.oanda_client.get_open_positions()
 
-        # Check to see if position is already open for this instrument.
+        # Check to see if order is already open for this instrument.
         for position in positions:
-            log(position["instrument"])
-            if position["instrument"] == instrument:
+            if position.instrument == instrument:
                 open_position = True
                 break
 
