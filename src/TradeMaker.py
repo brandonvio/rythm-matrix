@@ -18,8 +18,8 @@ module_name = "TradeMaker"
 rabbit = _rabbit()
 redis = _redis()
 
-# trader = Trader(*Trader.get_dependencies())
-trader = Trader(*Trader.get_dependencies_bt())
+trader = Trader(*Trader.get_dependencies())
+# trader = Trader(*Trader.get_dependencies_bt())
 price_list = []
 
 

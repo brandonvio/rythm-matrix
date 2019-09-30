@@ -43,7 +43,8 @@ def main(run_mode):
 
 
 if __name__ == "__main__":
-    redis.set_run_mode_testing()
+    # redis.set_run_mode_testing()
+    redis.set_run_mode_live()
     run_mode = redis.get_run_mode()
     print(f"======={run_mode}=======")
     main(run_mode)
