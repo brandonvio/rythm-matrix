@@ -18,8 +18,8 @@ module_name = "TradeMaker"
 rabbit = _rabbit()
 redis = _redis()
 
-trader = Trader(*Trader.get_dependencies())
-# trader = Trader(*Trader.get_dependencies_bt())
+# trader = Trader(*Trader.get_dependencies())
+trader = Trader(*Trader.get_dependencies_bt())
 price_list = []
 
 
@@ -106,10 +106,9 @@ if __name__ == "__main__":
     redis.set_bool(trd.PREPARE_SHORT, False)
     redis.set_bool(trd.PREPARE_LONG, False)
     redis.set("total_time", 0)
-    redis.set("total_longs", 0)
-    redis.set("total_shorts", 0)
-    redis.set("total_notrade", 0)
     redis.expire_now("order_log")
-
+    redis.expire_now(trd.LONG_TRADE)
+    redis.expire_now(trd.SHORT_TRADE)
+    redis.expire_now(trd.NO_TRADE)
     print(f"======={run_mode}=======")
     main(run_mode)

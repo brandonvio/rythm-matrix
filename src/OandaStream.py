@@ -5,11 +5,13 @@ from Environment import get_env
 
 
 class OandaStream:
-    def stream(self, callback):
+    def stream(self, callback, instruments=None):
         accountID = get_env(env.OANDA_DEFAULT_ACCOUNT)
         token = get_env(env.OANDA_TOKEN)
         headers = {"Authorization": f"Bearer {token}"}
-        instruments = ["EUR_USD", "USD_JPY", "AUD_USD", "USD_CAD", "USD_CHF", "USD_JPY", "EUR_JPY", "GBP_USD"]
+        if instruments is None:
+            instruments = ["EUR_USD", "USD_JPY", "AUD_USD", "USD_CAD", "USD_CHF", "USD_JPY", "EUR_JPY", "GBP_USD"]
+
         instrument_url = ""
         for instrument in instruments:
             instrument_url = instrument_url + f"{instrument}%2C"
@@ -22,5 +24,5 @@ class OandaStream:
         for line in r.iter_lines():
             if line:
                 line = json.loads(line.decode('utf-8'))
-                if line["type"] == "PRICE" and line["instrument"] == "EUR_USD":
+                if line["type"] == "PRICE":
                     callback(line)

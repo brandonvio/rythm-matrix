@@ -37,7 +37,7 @@ def test_calculate_short():
             position_type=trd.SHORT_TRADE,
             take_profit_pips=take_profit_pips,
             stop_loss_pips=stop_loss_pips,
-            fill_type="GTC")
+            time_in_force="GTC")
     )
 
     open_price = _converter.round4(open_price)
@@ -75,7 +75,7 @@ def test_calculate_long():
             position_type=trd.LONG_TRADE,
             take_profit_pips=take_profit_pips,
             stop_loss_pips=stop_loss_pips,
-            fill_type="GTC")
+            time_in_force="GTC")
     )
 
     open_price = _converter.round4(open_price)

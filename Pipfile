@@ -23,6 +23,7 @@ termcolor = "*"
 twilio = "*"
 jsonify = "*"
 jsonpickle = "*"
+pandas-datareader = "*"
 
 [requires]
 python_version = "3.7"

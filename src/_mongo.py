@@ -11,17 +11,17 @@ class _mongo:
         uri = get_env(env.MONGODB_FULL_URL)
         self.client = MongoClient(uri)
 
-    def get_data_from_oanda_stream(self, record_limit):
+    def get_data_from_oanda_stream(self, start_date, end_date, record_count):
         print("get_data_from_oanda_stream")
         result = self.client.matrix_data.oanda_stream.find(
             {
                 'time': {
-                    '$gt': "2019-09-17T06:00:00Z",
-                    '$lt': "2019-09-17T14:00:00Z"
+                    '$gt': start_date,
+                    '$lt': end_date
                 },
                 'instrument': 'EUR_USD'
             },
-            limit=record_limit)
+            limit=record_count)
         return result
 
     def get_testing_price_data(self):
