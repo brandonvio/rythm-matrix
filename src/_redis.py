@@ -7,12 +7,13 @@ class _redis():
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         redis_domain = get_env(env.REDIS_DOMAIN)
+        redis_password = get_env(env.REDIS_PASSWORD)
         self.redis = redis.StrictRedis(
             redis_domain,
             6379,
             encoding="utf-8",
             decode_responses=True,
-            password='adminadmin')
+            password=redis_password)
 
     def set(self, name, value):
         self.redis.set(name, value)
