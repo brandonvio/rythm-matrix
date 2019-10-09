@@ -1,0 +1,17 @@
+v20
+pandas
+asserts
+python-dotenv
+flask
+flask-cors
+pika
+pymongo
+redis
+finta
+plotly
+termcolor
+twilio
+jsonify
+jsonpickle
+pandas-datareader
+pyyaml

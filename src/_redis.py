@@ -80,12 +80,12 @@ if __name__ == "__main__":
     # redis.set_run_mode_testing()
     # print(redis.get_run_mode())
 
-    redis.expire_now("xlog")
-    redis.rpush("xlog", "log 1")
-    redis.rpush("xlog", "log 1")
-    redis.rpush("xlog", "log 2")
-    redis.rpush("xlog", "log 2")
+    # redis.expire_now("xlog")
+    # redis.rpush("xlog", "log 1")
+    # redis.rpush("xlog", "log 1")
+    # redis.rpush("xlog", "log 2")
+    # redis.rpush("xlog", "log 2")
 
-    list = redis.get_list("xlog")
+    # list = redis.get_list("xlog")
     print(list)
     print("done")

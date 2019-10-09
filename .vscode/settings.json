@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/Users/brandon/.local/share/virtualenvs/rythm-matrix-ucfpRYN0/bin/python",
+    "python.pythonPath": "/Users/brandon/.virtualenvs/myvenv/bin/python",
     "python.testing.pytestArgs": [
         "."
     ],
