@@ -52,7 +52,8 @@ class _redis():
         self.redis.rpush(name, value)
 
     def llen(self, name):
-        llen = self.redis.llen(name)
+        result = self.redis.llen(name)
+        return result
 
     def get_list(self, name):
         length = self.redis.llen(name)
