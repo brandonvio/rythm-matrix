@@ -1,2 +1,4 @@
 this is the command to install all python packages from requirements file:
 pip install -r requirements.txt
+
+docker build -t matrixacr.azurecr.io/oanda-live:v1 -f DockerfileLive .
