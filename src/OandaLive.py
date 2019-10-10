@@ -28,7 +28,7 @@ def publish_price(price_dict):
 
 def begin_publish_price_data():
     instruments = oanda_client.get_account_instruments()
-    instrument_array = []
+    instrument_array = ["EUR_USD"]
     for instrument in instruments:
         print(instrument.name)
         instrument_array.append(instrument.name)
@@ -51,4 +51,7 @@ def begin_publish_price_data():
 
 if __name__ == "__main__":
     print(f"======={module_name}=======")
-    begin_publish_price_data()
+    try:
+        begin_publish_price_data()
+    except:
+        begin_publish_price_data()
