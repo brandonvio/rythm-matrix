@@ -13,3 +13,6 @@ kubectl get service oanda-live --watch
 kubectl apply -f oanda-live.yml
 
 chown jenkins env-oanda-live
+
+
+http://matrix01.westus2.cloudapp.azure.com:8080/github-webhook/

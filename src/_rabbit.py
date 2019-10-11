@@ -27,19 +27,23 @@ class _rabbit:
         # initialize rabbitmq
         connection = self.get_connection()
         channel = connection.channel()
-        channel.exchange_declare(exchange=env.OANDA_PRICE_EXCHANGE, exchange_type='fanout')
+        channel.exchange_declare(
+            exchange=env.OANDA_PRICE_EXCHANGE, exchange_type='fanout')
 
         # queue 1
         result = channel.queue_declare(queue=env.OANDA_PRICE_QUEUE_1)
-        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
+        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE,
+                           queue=result.method.queue)
 
         # queue 2
         result = channel.queue_declare(queue=env.OANDA_PRICE_QUEUE_2)
-        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
+        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE,
+                           queue=result.method.queue)
 
         # queue 3
         result = channel.queue_declare(queue=env.OANDA_PRICE_QUEUE_3)
-        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE, queue=result.method.queue)
+        channel.queue_bind(exchange=env.OANDA_PRICE_EXCHANGE,
+                           queue=result.method.queue)
 
         self.oanda_publish_channel = channel
 
@@ -63,16 +67,18 @@ class _rabbit:
         # initialize rabbitmq
         connection = self.get_connection()
         channel = connection.channel()
-        channel.exchange_declare(exchange=env.LIVE_PRICE_EXCHANGE, exchange_type='fanout')
+        channel.exchange_declare(
+            exchange=env.LIVE_PRICE_EXCHANGE, exchange_type='fanout')
 
         # queue 1
         result = channel.queue_declare(queue=env.LIVE_PRICE_QUEUE_1)
-        channel.queue_bind(exchange=env.LIVE_PRICE_EXCHANGE, queue=result.method.queue)
+        channel.queue_bind(exchange=env.LIVE_PRICE_EXCHANGE,
+                           queue=result.method.queue)
 
         self.live_price_channel = channel
 
     def publish_live_price(self, price):
-        print("publish_live_price", price)
+        # print("publish_live_price", price)
         self.live_price_channel.basic_publish(exchange=env.LIVE_PRICE_EXCHANGE,
                                               routing_key='',
                                               body=price)
