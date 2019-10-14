@@ -18,6 +18,6 @@ node {
         echo "Push new docker image to container repository."
         sh "docker push matrixacr.azurecr.io/oanda-live:$env.BUILD_ID"
         echo "Deploy to kubernetes cluster."
-        sh "/usr/local/bin/kubectl set image deployments/oanda-live oanda-live=matrixacr.azurecr.io/oanda-live:$git_head --kubeconfig /var/jenkins_home/secrets/azure-k8-config"
+        sh "/usr/local/bin/kubectl set image deployments/oanda-live oanda-live=matrixacr.azurecr.io/oanda-live:$env.BUILD_ID --kubeconfig /var/jenkins_home/secrets/azure-k8-config"
     }
 }
