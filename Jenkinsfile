@@ -14,9 +14,9 @@ node {
         echo "Get git rev-parse head."        
         git_head = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
         echo "Build docker image."
-        sh "docker build -t matrixacr.azurecr.io/oanda-live:$git_head -f DockerfileLive ."
+        sh "docker build -t matrixacr.azurecr.io/oanda-live:$env.BUILD_ID -f DockerfileLive ."
         echo "Push new docker image to container repository."
-        sh "docker push matrixacr.azurecr.io/oanda-live:$git_head"
+        sh "docker push matrixacr.azurecr.io/oanda-live:$env.BUILD_ID"
         echo "Deploy to kubernetes cluster."
         sh "/usr/local/bin/kubectl set image deployments/oanda-live oanda-live=matrixacr.azurecr.io/oanda-live:$git_head --kubeconfig /var/jenkins_home/secrets/azure-k8-config"
     }
