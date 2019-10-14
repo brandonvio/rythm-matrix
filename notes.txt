@@ -5,14 +5,16 @@ docker run -p 4002:4002 --env-file ./.env.dev bc0948b1cedc
 
 docker build -t matrixacr.azurecr.io/oanda-live:v1 -f DockerfileLive .
 docker push matrixacr.azurecr.io/oanda-live:v1
-
 kubectl logs --follow rythm-api-5d5ffcfd57-fcgmg
 kubectl logs --follow oanda-live-7664c585c-cgx5w
 kubectl describe pod oanda-live-7664c585c-cgx5w
 kubectl get service oanda-live --watch
 kubectl apply -f oanda-live.yml
+kubectl exec -it shell-demo -- /bin/bash
+
+kubectl exec -it matrix-rabbitmq-0 -- /bin/bash
+kubectl get service matrix-rabbitmq --output yaml
 
 chown jenkins env-oanda-live
-
 
 http://matrix01.westus2.cloudapp.azure.com:8080/github-webhook/
