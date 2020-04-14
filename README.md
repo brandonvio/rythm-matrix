@@ -2,7 +2,7 @@
 
 Forex, Crypto and Stock application. Running on a Kubernetes cluster in Azure. API integrations with Oanda and IEX Cloud.
 
-[rythm.cc](https://app.rythm.cc)
+[rythm.cc](http://app.rythm.cc)
 
 ## Architecture
 
