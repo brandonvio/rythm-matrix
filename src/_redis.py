@@ -61,7 +61,7 @@ class _redis():
 
     def get_list(self, name):
         length = self.redis.llen(name)
-        list = self.redis.lrange(name, 0, length)
+        list = self.redis.lrange(name, 0, length-1)
         return list
 
     def set_run_mode_testing(self):

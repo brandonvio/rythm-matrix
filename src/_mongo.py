@@ -29,11 +29,11 @@ class _mongo:
         result = self.client.matrix_data.oanda_stream.find(
             {
                 'time': {
-                    '$gt': "2019-09-16T00:00:00Z",
-                    '$lt': "2019-09-17T00:00:00Z"
+                    '$gt': "2019-10-14T00:00:00Z",
+                    '$lt': "2019-10-17T00:00:00Z"
                 },
                 'instrument': 'EUR_USD'
-            }).sort("time", pymongo.DESCENDING)
+            }).sort("time", pymongo.ASCENDING)
 
         price_list = list(result)
         return price_list

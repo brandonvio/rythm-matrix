@@ -11,10 +11,33 @@ kubectl describe pod oanda-live-7664c585c-cgx5w
 kubectl get service oanda-live --watch
 kubectl apply -f oanda-live.yml
 kubectl exec -it shell-demo -- /bin/bash
-
+az aks browse --resource-group matrix_aks --name matrix-cluster
 kubectl exec -it matrix-rabbitmq-0 -- /bin/bash
 kubectl get service matrix-rabbitmq --output yaml
 
 chown jenkins env-oanda-live
 
 http://matrix01.westus2.cloudapp.azure.com:8080/github-webhook/
+
+
+buid a tutorial app using feather.js
+https://docs.feathersjs.com/api/client/socketio.html#update
+https://www.youtube.com/watch?v=8y33WCVkLwc
+
+Build thumbnails using adobe spark
+https://spark.adobe.com/make/youtube-thumbnail-maker/
+
+Listen to this podcast "Practical - How would we build Airbnb, Twitter, or Reddit?"
+https://syntax.fm/show/182/practical-how-would-we-build-airbnb-twitter-or-reddit
+
+integrate iexcloud into app
+https://iexcloud.io/pricing/
+
+Look at these kubernetes coures on Udemy more:
+https://www.udemy.com/course/container-masterclass-with-docker-and-kubernetes/
+
+Look into the courses for certified kub dev:
+https://training.linuxfoundation.org/training/kubernetes-for-developers/
+
+Dive into this deeper. Looks surreal.
+https://pypi.org/project/stock-analysis-engine/

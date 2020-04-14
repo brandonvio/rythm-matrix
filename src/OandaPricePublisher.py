@@ -25,7 +25,7 @@ def mongodb_loop(start_date, end_date, record_count):
         record_count=record_count)
 
     # publish to queue
-    for i, record in enumerate(records):
+    for _, record in enumerate(records):
         # time.sleep(1)
         publish_price(record)
 
