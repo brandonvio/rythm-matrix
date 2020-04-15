@@ -20,7 +20,7 @@ Forex, Crypto and Stock application. Running on a Kubernetes cluster in Azure. A
 
 MongoDB running in VM on Azure. Pricing data stream via RabbitMQ. Data caching with Redis.
 
-![Architecture](https://raw.githubusercontent.com/brandonvio/rythm-matrix/master/arch2.png)
+![Architecture](https://raw.githubusercontent.com/brandonvio/rythm-matrix/master/documentation/images/arch.png)
 
 ![Architecture](https://raw.githubusercontent.com/brandonvio/rythm-matrix/master/documentation/images/screenshot01.png)
 
