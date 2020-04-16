@@ -28,6 +28,8 @@ MongoDB running in VM on Azure. Pricing data stream via RabbitMQ. Data caching w
 
 ![Architecture](https://raw.githubusercontent.com/brandonvio/rythm-matrix/master/documentation/images/screenshot03.png)
 
+![Architecture](https://raw.githubusercontent.com/brandonvio/rythm-matrix/master/documentation/images/screenshot06.png)
+
 ![Architecture](https://raw.githubusercontent.com/brandonvio/rythm-matrix/master/documentation/images/screenshot04.png)
 
 ![Architecture](https://raw.githubusercontent.com/brandonvio/rythm-matrix/master/documentation/images/screenshot05.png)
